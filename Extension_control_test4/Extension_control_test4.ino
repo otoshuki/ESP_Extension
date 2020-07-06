@@ -44,7 +44,7 @@ void setup() {
 
 void loop() {
   WiFiClient client = server.available();  
-
+  bool changed = 0;
   if (client) {                            
     Serial.println("New Client.");          
     String currentLine = "";               
@@ -69,7 +69,13 @@ void loop() {
             client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>");
             client.println("<meta name=\"description\" content=\"ESP32 based Extension Controller\"/>");
             client.println("<meta name=\"author\" content=\"Guining Pertin\"/>");
-            client.println("<meta http-equiv=\"refresh\" content=\"0; url=192.168.4.1\"/>");
+
+            //To return to homepage in case of button press
+            if (changed)
+            {
+              client.println("<meta http-equiv=\"refresh\" content=\"0;url=/\"/>");
+              changed = 0;
+            }
             
             client.println("<link rel=\"icon\" href=\"data:,\">");
             //CSS to style buttons
@@ -92,6 +98,8 @@ void loop() {
             
             if(!state4) client.println("<p><a href=\"/C4\"><button class=\"button1\">EXT Port4<br>ON</button></a></p>");
             else client.println("<p><a href=\"/C4\"><button class=\"button2\">EXT Port4<br>OFF</button></a></p>");
+
+            client.println("</body></html>");
             
             // The HTTP response ends with another blank line:
             client.println();
@@ -114,16 +122,19 @@ void loop() {
         {
           state1 = !state1;
           digitalWrite(control1, state1);
+          changed = 1;
         }
         if (currentLine.endsWith("GET /C3"))
         {
           state3 = !state3;
           digitalWrite(control3, state3);
+          changed = 1;
         }
         if (currentLine.endsWith("GET /C4"))
         {
           state4 = !state4;
           digitalWrite(control4, state4);
+          changed = 1;
         }
         
       }
